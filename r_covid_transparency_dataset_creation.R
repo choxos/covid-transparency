@@ -9,130 +9,25 @@ pacman::p_load(dplyr,
                rtransparent, 
                metareadr, 
                europepmc,
-               here)
+               here,
+               stringr)
 
 # Creating the dataset
-## Getting desired COVID-19 keywords
-COVID_19_keywords <- read.csv(here("data", "covid_transparency_keywords.csv"))
+## Getting all open access records from EPMC
+### As the number was high (1.5M), we divided that to five parts, each half a year.
 
-### Some modifications are needed to create proper keywords for Title, Keywords
-### and Results:
-COVID_19_keywords <- COVID_19_keywords %>% mutate(
-        search.term.title = paste0("TITLE:", '"', Keyword, '"'),
-        search.term.keyword = paste0("KW:", '"', Keyword, '"'),
-        search.term.results = paste0("RESULTS:", '"', Keyword, '"'))
+db_2020_1 <- epmc_search(query = '(FIRST_PDATE:[2020-01-01 TO 2020-06-30]) 
+                                AND (OPEN_ACCESS:y) 
+                                AND (SRC:"MED")
+                                AND (LANG:"eng" OR LANG:"en" OR LANG:"us")',
+                        limit = 1000000,
+                        output = "parsed",
+                        verbose = F)
 
-TitleQuery <- paste(COVID_19_keywords$search.term.title,
-                    collapse = " OR ")
-
-KeywordQuery <- paste(COVID_19_keywords$search.term.keyword,
-                      collapse = " OR ")
-
-ResultQuery <- paste(COVID_19_keywords$search.term.results,
-                     collapse = " OR ")
-
-### Getting all open-access and EPMC COVID-19-related papers indexed in PubMed
-
-#### As in this step we should download a large file that includes the 
-#### characteristics of papers of our query, to ease the process, we divided our 
-#### query to five separate queries based on the date: 1- first half of 2020;
-#### 2- second half of 2020; 3- first half of 2021; 4- second half of 2021;
-#### 5- the first two months of 2022.
-
-db_2020_1 <- epmc_search(
-        query = paste0("(", TitleQuery, " OR ", 
-                       KeywordQuery, " OR ", 
-                       ResultQuery, ") ", 
-                       'AND (SRC:"MED") 
-                       AND (LANG:"eng" OR LANG:"en" OR LANG:"us") 
-                       AND (FIRST_PDATE:[2020-01-01 TO 2020-06-30]) 
-                       AND (OPEN_ACCESS:y) 
-                       AND (PUB_TYPE:"Journal Article" 
-                            OR PUB_TYPE:"research-article" 
-                            OR PUB_TYPE:"rapid-communication" 
-                            OR PUB_TYPE:"product-review")'), 
-        limit = 100000, 
-        output = "parsed")
-
-# total oa and non oa: 19467
-
-db_2020_2 <- epmc_search(
-        query = paste0("(", TitleQuery, " OR ", 
-                       KeywordQuery, " OR ", 
-                       ResultQuery, ") ", 
-                       'AND (SRC:"MED") 
-                       AND (LANG:"eng" OR LANG:"en" OR LANG:"us") 
-                       AND (FIRST_PDATE:[2020-07-01 TO 2020-12-31]) 
-                       AND (OPEN_ACCESS:y) 
-                       AND (PUB_TYPE:"Journal Article" 
-                            OR PUB_TYPE:"research-article" 
-                            OR PUB_TYPE:"rapid-communication" 
-                            OR PUB_TYPE:"product-review")'), 
-        limit = 100000, 
-        output = "parsed")
-
-# total oa and non oa: 43107
-
-db_2021_1 <- epmc_search(
-        query = paste0("(", TitleQuery, " OR ", 
-                       KeywordQuery, " OR ", 
-                       ResultQuery, ") ", 
-                       'AND (SRC:"MED") 
-                       AND (LANG:"eng" OR LANG:"en" OR LANG:"us") 
-                       AND (FIRST_PDATE:[2021-01-01 TO 2021-06-30]) 
-                       AND (OPEN_ACCESS:y) 
-                       AND (PUB_TYPE:"Journal Article" 
-                            OR PUB_TYPE:"research-article" 
-                            OR PUB_TYPE:"rapid-communication" 
-                            OR PUB_TYPE:"product-review")'), 
-        limit = 100000, 
-        output = "parsed")
-
-# total oa and non oa: 50512
-
-db_2021_2 <- epmc_search(
-        query = paste0("(", TitleQuery, " OR ", 
-                       KeywordQuery, " OR ", 
-                       ResultQuery, ") ", 
-                       'AND (SRC:"MED") 
-                       AND (LANG:"eng" OR LANG:"en" OR LANG:"us") 
-                       AND (FIRST_PDATE:[2021-07-01 TO 2021-12-31]) 
-                       AND (OPEN_ACCESS:y) 
-                       AND (PUB_TYPE:"Journal Article" 
-                            OR PUB_TYPE:"research-article" 
-                            OR PUB_TYPE:"rapid-communication" 
-                            OR PUB_TYPE:"product-review")'), 
-        limit = 100000, 
-        output = "parsed")
-
-# total oa and non oa: 47975
-
-db_2022 <- epmc_search(
-        query = paste0("(", TitleQuery, " OR ", 
-                       KeywordQuery, " OR ", 
-                       ResultQuery, ") ", 
-                       'AND (SRC:"MED") 
-                       AND (LANG:"eng" OR LANG:"en" OR LANG:"us") 
-                       AND (FIRST_PDATE:[2022-01-01 TO 2022-02-28]) 
-                       AND (OPEN_ACCESS:y) 
-                       AND (PUB_TYPE:"Journal Article" 
-                            OR PUB_TYPE:"research-article" 
-                            OR PUB_TYPE:"rapid-communication" 
-                            OR PUB_TYPE:"product-review")'), 
-        limit = 100000, 
-        output = "parsed")
-
-# total oa and non oa: 14272
+### and four other more: db_2020_2, db_2021_1, db_2021_2, db_2022
 
 
-### We then do the following for each of them
-### Let's see how many duplicates are there:
-table(duplicated(db_2020_1$pmid))
-table(duplicated(db_2020_2$pmid))
-table(duplicated(db_2021_1$pmid))
-table(duplicated(db_2021_2$pmid))
-table(duplicated(db_2022$pmid))
-
+## We then do the following for each of them
 ### Removing the duplicates:
 db_2020_1 <- db_2020_1 %>% distinct(pmid, .keep_all = TRUE)
 db_2020_2 <- db_2020_2 %>% distinct(pmid, .keep_all = TRUE)
@@ -141,6 +36,29 @@ db_2021_2 <- db_2021_2 %>% distinct(pmid, .keep_all = TRUE)
 db_2022 <- db_2022 %>% distinct(pmid, .keep_all = TRUE)
 
 
+## In the next step, we gather COVID-19-related papers' PMIDs from LitCovid database.
+
+ris_covid_all <- read.delim("data/06102022.litcovid.export.tsv", 
+                            quote = "", 
+                            fill = F)
+
+names(ris_covid_all) <- "pmid"
+
+pmids <- as.data.frame(ris_covid_all[!is.na(as.numeric(ris_covid_all$pmid)), ])
+names(pmids) <- "pmid"
+
+## Then, we merge (inner-join) pmids with each of the db to have the intersection
+## between these two. The intersection would be open access COVID-19-related papers.
+
+covid_2020_1 <- merge(db_2020_1, pmids, by = "pmid")
+covid_2020_2 <- merge(db_2020_2, pmids, by = "pmid")
+covid_2021_1 <- merge(db_2021_1, pmids, by = "pmid")
+covid_2021_2 <- merge(db_2021_2, pmids, by = "pmid")
+covid_2022 <- merge(db_2022, pmids, by = "pmid")
+
+
+
+## That's it! Next, we'll download xml files.
 ### Creating a new column from pmcid column and removing "PMC" from the cells:
 db_2020_1$pmcid_ <- gsub("PMC", "", as.character(db_2020_1$pmcid))
 db_2020_2$pmcid_ <- gsub("PMC", "", as.character(db_2020_2$pmcid))
@@ -175,20 +93,23 @@ sapply(db_2022$pmcid_, skipping_errors)
 ### Now we run rtransparent (do for all others as well (f2-f5)):
 filepath1 = dir(pattern=glob2rx("PMC*.xml"))
 
-results_table_all_f1 <- sapply(filepath1, rt_all_pmc)
+results_all_2020_1 <- sapply(filepath1, rt_all_pmc)
 
-results_table_data_f1 <- rt_data_code_pmc_list(
+results_data_2020_1 <- rt_data_code_pmc_list(
         filepath1,
         remove_ns=F,
         specificity = "low")
 
 ### A list is created now. We should convert this list to a dataframe:
-df1 <- data.table::rbindlist(results_table_all_f1, fill = TRUE)
+results_all_2020_1 <- data.table::rbindlist(results_all_2020_1, fill = TRUE)
 
 ### Merge data sharing results to database file:
 setwd('..')
 db <- db[!duplicated(db[, 4]),]
-opendata <- merge(db_2020_1, results_table_data_f1, by = "pmid") %>% merge(df1)
+opendata_2020_1 <- merge(db_2020_1, results_data_2020_1, by = "pmid") %>% merge(results_all_2020_1)
+
+### Then, rbin all opendata:
+opendata <- rbind(opendata_2020_1, opendata_2020_2, opendata_2021_1, opendata_2021_2, opendata_2022)
 
 ### Selecting only needed columns:
 opendata <- opendata %>% select(pmid,
@@ -291,16 +212,46 @@ opendata$sjr2020 <- as.numeric(opendata$sjr2020)
 
 opendata <- opendata[, c(2:7, 1, 29, 8:28, 30:32)]
 
+# Adding is_rct columns
+ris_covid <- read.delim("data/covid-rcts-iloveevidence.ris", 
+                        quote = "", 
+                        fill = F)
+
+pmids <- ris_covid %>% 
+        filter(str_detect(TY....JOUR, "pmid"))
+
+# Removing unnecessary strings from rows
+
+pmids[] <- sapply(pmids, function(x) gsub("U1  - ", "", as.character(x)))
+pmids[] <- sapply(pmids, function(x) gsub("[pmid]", "", as.character(x), fixed = T))
+pmids[] <- sapply(pmids, function(x) gsub("NLM", "", as.character(x)))
+
+pmids[,1] <- as.numeric(pmids[,1])
+
+names(pmids) <- "pmid"
+
+# Adding is_rct as a column. This takes a little while.
+
+for (i in 1:nrow(opendata)) {
+        a <- opendata$pmid[i]
+        b <- pmids[which(pmids$pmid == a), 1]
+        ifelse(rlang::is_empty(b) == TRUE, 
+               opendata$is_rct[i] <- FALSE, 
+               opendata$is_rct[i] <- TRUE)
+}
 
 
-### Random sample of search results for validation of our approach (100 refs):
+
+# Writing to CSV
+write.csv(opendata, "data/covid_transparency_opendata_final.csv")
+
+
+# Random samples
+### Random sample for manual study type detection and for indicators validation (100 refs):
 set.seed(100)
-randomsample1 <- db1[sample(nrow(db1), 100), ]
-
-### Random sample for indicators validation (100 refs):
-set.seed(100)
-sample_valid <- opendata[sample(nrow(opendata), 100), ]
-sample_valid <- sample_valid %>% select(title,
+randomsample <- filter(opendata, type == "research-article")
+randomsample <- opendata[sample(nrow(opendata), 100), ]
+randomsample <- randomsample %>% select(title,
                                         authorString,
                                         journalTitle,
                                         pmid,
@@ -316,10 +267,12 @@ sample_valid <- sample_valid %>% select(title,
                                         open_data_statements,
                                         is_open_code,
                                         open_code_statements) %>%
-        mutate(disc_coi = TRUE,
+        mutate(study_type = NA,
+               disc_coi = TRUE,
                disc_fund = TRUE,
                disc_register = FALSE,
                disc_data = FALSE,
                disc_code = FALSE)
-write.csv(sample_valid, "data/covid_transparency_sample_validation.csv")
+
+write.csv(randomsample, "data/covid_transparency_randomsample.csv")
 

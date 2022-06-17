@@ -151,7 +151,7 @@ The computational analyzes were performed on servers provided by UEF Bioinformat
 Table 1. Transparency practices in the six most common journals in the sample.
 
 | **Measurement**       | **BMC Oral Health, N = 2503** | **Dental Press J Orthod, N = 530** | **Head Face Med, N = 572** | **J Appl Oral Sci, N = 1440** | **J Indian Prosthodont Soc, N = 495** | **Med Oral Patol Oral Cir Bucal, N = 1174** | **Other, N = 3945** | **p-value** |
-|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+|-----------------------|-------------------------------|------------------------------------|----------------------------|-------------------------------|---------------------------------------|---------------------------------------------|---------------------|-------------|
 | COI disclosure        | 2489 (99%)                    | 502 (95%)                          | 537 (94%)                  | 303 (21%)                     | 301 (61%)                             | 869 (74%)                                   | 3172 (80%)          | \<0.001     |
 | Funding disclosure    | 2232 (89%)                    | 87 (16%)                           | 280 (49%)                  | 656 (46%)                     | 301 (61%)                             | 497 (42%)                                   | 2505 (63%)          | \<0.001     |
 | Protocol registration | 326 (13%)                     | 12 (2.3%)                          | 23 (4.0%)                  | 31 (2.2%)                     | 4 (0.8%)                              | 43 (3.7%)                                   | 298 (7.6%)          | \<0.001     |
@@ -163,7 +163,7 @@ P-values from Fisher's Exact Test for Count Data with simulated p-value (based o
 Table 2. Transparency practices in the six most common publishers of journals in the sample.
 
 | Measurement           | BioMed Central, N = 3075 | Dental Press Editora, N = 530 | Faculdade de Odontologia de Bauru, N = 1440 | Medicina Oral, Patologia Oral y Cirugia Bucal, N 1174 | Springer Verlag, N = 935 | Wolters Kluwer Medknow Publications, N = 495 | Other, N = 2619 | p-value |
-|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+|-----------------------|--------------------------|-------------------------------|---------------------------------------------|-------------------------------------------------------|--------------------------|----------------------------------------------|-----------------|---------|
 | COI disclosure        | 3026 (98%)               | 502 (95%)                     | 303 (21%)                                   | 869 (74%)                                             | 904 (97%)                | 301 (61%)                                    | 1878 (72%)      | \<0.001 |
 | Funding disclosure    | 2512 (82%)               | 87 (16%)                      | 656 (46%)                                   | 497 (42%)                                             | 596 (64%)                | 301 (61%)                                    | 1593 (61%)      | \<0.001 |
 | Protocol registration | 349 (11%)                | 12 (2.3%)                     | 31 (2.2%)                                   | 43 (3.7%)                                             | 113 (12%)                | 4 (0.8%)                                     | 144 (5.5%)      | \<0.001 |
@@ -175,7 +175,7 @@ P-values from Fisher's Exact Test for Count Data with simulated p-value (based o
 Table 3. Citations to article and journal impact factor by transparency practices.
 
 |                    | Citations to article |         |          | Journal Impact Factor |            |          |
-|-----------|-----------|-----------|-----------|:----------|:----------|-----------|
+|--------------------|----------------------|---------|----------|:----------------------|:-----------|----------|
 | Measurement        | Median (IQR)         |         | P-Value  | Median (IQR)          |            | P-value  |
 |                    | With                 | Without |          | With                  | Without    |          |
 | COI disclosure     | 2 (5)                | 5 (9)   | \< 0.001 | 2.8 (0.61)            | 2.7 (0.06) | \< 0.001 |
