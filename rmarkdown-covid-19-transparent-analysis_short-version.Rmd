@@ -279,9 +279,15 @@ First, we subset the data to only include RCTs using is_rct variable:
 rct <- opendata %>% filter(is_rct == TRUE)
 ```
 
+Total number of RCTs:
+```{r}
+nrow(rct)
+```
+
+
 Number of open access papers per year:
 ```{r}
-kable(table(rct$year_firstpub))
+kable(tabyl(rct$year_firstpub) %>% adorn_pct_formatting())
 ```
 
 The number of journals in our dataset:
@@ -290,21 +296,11 @@ length(table(rct$journalTitle))
 ```
 Top 10 journals with the highest number of articles in our dataset, from high to low:
 ```{r}
-kable(head(table(rct$journalTitle) 
-           %>% as.data.frame() 
-           %>% arrange(desc(Freq)), 10))
+kable(head(tabyl(rct$journalTitle) %>%
+                 adorn_pct_formatting() %>%
+                 as.data.frame() %>%
+                 arrange(desc(n)), 10))
 ```
-
-Also, same table, but with all the journals
-
-```{r}
-rct %>% 
-        mutate(journal = fct_lump_prop(journalTitle, prop = 0.01) ) %>% 
-        count(journal) %>% 
-        arrange(desc(n)) %>% 
-        knitr::kable()
-```
-
 
 
 The mean and the median of the number of citations to these references:
@@ -341,15 +337,6 @@ kable(round(epi.prev(pos = length(rct$is_coi_pred[rct$is_coi_pred == TRUE]),
       1))
 ```
 
-Comparing CoI disclosure rate in three years:
-```{r}
-kable(round(prop.table(table(rct$is_coi_pred, rct$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(rct$is_coi_pred, rct$year_firstpub)
-```
 
 The number and percentage of papers with a funding statement:
 ```{r}
@@ -368,15 +355,6 @@ kable(round(epi.prev(pos = length(rct$is_fund_pred[rct$is_fund_pred == TRUE]),
       1))
 ```
 
-Comparing funding statement rate in three years:
-```{r}
-kable(round(prop.table(table(rct$is_fund_pred, rct$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(rct$is_fund_pred, rct$year_firstpub)
-```
 
 The number and percentage of papers that were registered beforehand:
 ```{r}
@@ -395,15 +373,6 @@ kable(round(epi.prev(pos = length(rct$is_register_pred[rct$is_register_pred == T
       1))
 ```
 
-Comparing registration rate in three years:
-```{r}
-kable(round(prop.table(table(rct$is_register_pred, rct$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(rct$is_register_pred, rct$year_firstpub)
-```
 
 
 The number and percentage of papers that shared data:
@@ -423,15 +392,6 @@ kable(round(epi.prev(pos = length(rct$is_open_data[rct$is_open_data == TRUE]),
       1))
 ```
 
-Comparing data sharing rate in three years:
-```{r}
-kable(round(prop.table(table(rct$is_open_data, rct$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(rct$is_open_data, rct$year_firstpub)
-```
 
 The number and percentage of papers that shared code:
 ```{r}
@@ -450,6 +410,49 @@ kable(round(epi.prev(pos = length(rct$is_open_code[rct$is_open_code == TRUE]),
       1))
 ```
 
+
+### Comparing years
+Comparing CoI disclosure rate in three years:
+```{r}
+kable(round(prop.table(table(rct$is_coi_pred, rct$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(rct$is_coi_pred, rct$year_firstpub)
+```
+
+Comparing funding statement rate in three years:
+```{r}
+kable(round(prop.table(table(rct$is_fund_pred, rct$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(rct$is_fund_pred, rct$year_firstpub)
+```
+
+Comparing registration rate in three years:
+```{r}
+kable(round(prop.table(table(rct$is_register_pred, rct$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(rct$is_register_pred, rct$year_firstpub)
+```
+
+
+Comparing data sharing rate in three years:
+```{r}
+kable(round(prop.table(table(rct$is_open_data, rct$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(rct$is_open_data, rct$year_firstpub)
+```
+
 Comparing sharing code rate in three years:
 ```{r}
 kable(round(prop.table(table(rct$is_open_code, rct$year_firstpub), 2)*100, 1))
@@ -459,6 +462,7 @@ Chi-square test:
 ```{r}
 chisq.test(rct$is_open_code, rct$year_firstpub)
 ```
+
 
 Sum of five indicators:
 ```{r}
@@ -472,9 +476,14 @@ First, we subset the data to only include review papers using is_review variable
 review <- opendata %>% filter(is_review == TRUE)
 ```
 
+Total number of reviews:
+```{r}
+nrow(review)
+```
+
 Number of open access papers per year:
 ```{r}
-kable(table(review$year_firstpub))
+kable(tabyl(review$year_firstpub) %>% adorn_pct_formatting())
 ```
 
 The number of journals in our dataset:
@@ -483,21 +492,11 @@ length(table(review$journalTitle))
 ```
 Top 10 journals with the highest number of articles in our dataset, from high to low:
 ```{r}
-kable(head(table(review$journalTitle) 
-           %>% as.data.frame() 
-           %>% arrange(desc(Freq)), 10))
+kable(head(tabyl(review$journalTitle) %>%
+                 adorn_pct_formatting() %>%
+                 as.data.frame() %>%
+                 arrange(desc(n)), 10))
 ```
-
-Also, same table, but with all the journals
-
-```{r}
-review %>% 
-        mutate(journal = fct_lump_prop(journalTitle, prop = 0.01) ) %>% 
-        count(journal) %>% 
-        arrange(desc(n)) %>% 
-        knitr::kable()
-```
-
 
 
 The mean and the median of the number of citations to these references:
@@ -534,15 +533,6 @@ kable(round(epi.prev(pos = length(review$is_coi_pred[review$is_coi_pred == TRUE]
       1))
 ```
 
-Comparing CoI disclosure rate in three years:
-```{r}
-kable(round(prop.table(table(review$is_coi_pred, review$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(review$is_coi_pred, review$year_firstpub)
-```
 
 The number and percentage of papers with a funding statement:
 ```{r}
@@ -561,15 +551,6 @@ kable(round(epi.prev(pos = length(review$is_fund_pred[review$is_fund_pred == TRU
       1))
 ```
 
-Comparing funding statement rate in three years:
-```{r}
-kable(round(prop.table(table(review$is_fund_pred, review$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(review$is_fund_pred, review$year_firstpub)
-```
 
 The number and percentage of papers that were registered beforehand:
 ```{r}
@@ -586,16 +567,6 @@ kable(round(epi.prev(pos = length(review$is_register_pred[review$is_register_pre
          se = 0.955,
          sp = 0.997)$ap, 
       1))
-```
-
-Comparing registration rate in three years:
-```{r}
-kable(round(prop.table(table(review$is_register_pred, review$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(review$is_register_pred, review$year_firstpub)
 ```
 
 
@@ -616,15 +587,6 @@ kable(round(epi.prev(pos = length(review$is_open_data[review$is_open_data == TRU
       1))
 ```
 
-Comparing data sharing rate in three years:
-```{r}
-kable(round(prop.table(table(review$is_open_data, review$year_firstpub), 2)*100, 1))
-```
-
-Chi-square test:
-```{r}
-chisq.test(review$is_open_data, review$year_firstpub)
-```
 
 The number and percentage of papers that shared code:
 ```{r}
@@ -643,6 +605,48 @@ kable(round(epi.prev(pos = length(review$is_open_code[review$is_open_code == TRU
       1))
 ```
 
+### Comparing years
+Comparing CoI disclosure rate in three years:
+```{r}
+kable(round(prop.table(table(review$is_coi_pred, review$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(review$is_coi_pred, review$year_firstpub)
+```
+
+Comparing funding statement rate in three years:
+```{r}
+kable(round(prop.table(table(review$is_fund_pred, review$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(review$is_fund_pred, review$year_firstpub)
+```
+
+Comparing registration rate in three years:
+```{r}
+kable(round(prop.table(table(review$is_register_pred, review$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(review$is_register_pred, review$year_firstpub)
+```
+
+
+Comparing data sharing rate in three years:
+```{r}
+kable(round(prop.table(table(review$is_open_data, review$year_firstpub), 2)*100, 1))
+```
+
+Chi-square test:
+```{r}
+chisq.test(review$is_open_data, review$year_firstpub)
+```
+
 Comparing sharing code rate in three years:
 ```{r}
 kable(round(prop.table(table(review$is_open_code, review$year_firstpub), 2)*100, 1))
@@ -652,6 +656,7 @@ Chi-square test:
 ```{r}
 chisq.test(review$is_open_code, review$year_firstpub)
 ```
+
 
 Sum of five indicators:
 ```{r}
