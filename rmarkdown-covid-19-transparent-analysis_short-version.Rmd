@@ -29,7 +29,7 @@ pacman::p_load(dplyr,
 # Loading the datasets
 
 ```{r}
-opendata <- read.csv(here("data", "covid_transparency_opendata.csv"))
+opendata <- read.csv(here("data", "covid_transparency_opendata_final_new.csv"))
 ```
 
 
@@ -660,7 +660,7 @@ chisq.test(review$is_open_code, review$year_firstpub)
 
 Sum of five indicators:
 ```{r}
-review %>% mutate(sum = rowSums(review %>% select(is_coi_pred, is_register_pred, is_fund_pred, is_open_data, is_open_code))) %>% select(sum) %>% tbl_summary()
+review %>% mutate(sum = rowSums(review %>% select(is_coi_pred, is_register_pred, is_fund_pred, is_open_data, is_open_code))) %>% select(sum) %>% tbl_summary() 
 ```
 
 
@@ -1108,7 +1108,76 @@ fig1
 ```
 
 
-# Appendix
+# Appendix 1
+
+Citations to article and journal impact factor by transparency practices for RCTs
+Table S1A
+```{r}
+set.seed(100)
+
+map(
+  c("is_coi_pred", "is_fund_pred", "is_register_pred", "is_open_data", "is_open_code"),
+  ~ tbl_summary(
+      rct,
+      by = all_of(.x),
+      include = citedByCount,
+      label = list(citedByCount = .x)
+    ) %>% add_p()
+) %>% tbl_stack()
+
+```
+
+
+Table S1B
+```{r}
+set.seed(100)
+
+map(
+  c("is_coi_pred", "is_fund_pred", "is_register_pred", "is_open_data", "is_open_code"),
+  ~ tbl_summary(
+      rct,
+      by = all_of(.x),
+      include = jif2020,
+      label = list(jif2020 = .x)
+    ) %>% add_p()
+) %>% tbl_stack()
+
+```
+
+Citations to article and journal impact factor by transparency practices for reviews
+Table S2A
+```{r}
+set.seed(100)
+
+map(
+  c("is_coi_pred", "is_fund_pred", "is_register_pred", "is_open_data", "is_open_code"),
+  ~ tbl_summary(
+      review,
+      by = all_of(.x),
+      include = citedByCount,
+      label = list(citedByCount = .x)
+    ) %>% add_p()
+) %>% tbl_stack()
+
+```
+
+
+Table S2B
+```{r}
+set.seed(100)
+
+map(
+  c("is_coi_pred", "is_fund_pred", "is_register_pred", "is_open_data", "is_open_code"),
+  ~ tbl_summary(
+      review,
+      by = all_of(.x),
+      include = jif2020,
+      label = list(jif2020 = .x)
+    ) %>% add_p()
+) %>% tbl_stack()
+
+```
+
 ## Journals
 
 Total number of papers published in journals with an SJR:
