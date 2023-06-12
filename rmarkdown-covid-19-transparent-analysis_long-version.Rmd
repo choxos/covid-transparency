@@ -326,115 +326,6 @@ research %>%
 ```
 
 
-## Journal Impact Factor (JIF) and citation count analyses (Table 3)
-
-Total number of papers published in journals with no JIF:
-```{r}
-sum(is.na(research$jif2020))
-```
-Normality of JIFs and citations
-```{r}
-hist(research$jif2020)
-hist(research$citedByCount)
-ad.test(research$jif2020)
-ad.test(research$citedByCount)
-```
-
-JIF and citations based on COI disclosure:
-```{r}
-kable(research %>% 
-  group_by(is_coi_pred) %>% 
-  summarise(Median = round(median(jif2020, na.rm = T), 1),
-            IQR = round(IQR(jif2020, na.rm = T), 2)))
-
-kable(research %>% 
-  group_by(is_coi_pred) %>% 
-  summarise(Median = round(median(citedByCount, na.rm = T), 1),
-            IQR = round(IQR(citedByCount, na.rm = T), 2)))
-```
-
-Data was not normally distributed, hence we will use unpaired two-samples Wilcoxon test.
-```{r}
-wilcox.test(jif2020~is_coi_pred, data = research, exact = FALSE)
-wilcox.test(citedByCount~is_coi_pred, data = research, exact = FALSE)
-```
-
-JIF and citations based on funding disclosure:
-```{r}
-kable(research %>% 
-  group_by(is_fund_pred) %>% 
-  summarise(Median = round(median(jif2020, na.rm = T), 1),
-            IQR = round(IQR(jif2020, na.rm = T), 2)))
-
-kable(research %>% 
-  group_by(is_fund_pred) %>% 
-  summarise(Median = round(median(citedByCount, na.rm = T), 1),
-            IQR = round(IQR(citedByCount, na.rm = T), 2)))
-```
-
-Data was not normally distributed, hence we will use unpaired two-samples Wilcoxon test.
-```{r}
-wilcox.test(jif2020~is_fund_pred, data = research, exact = FALSE)
-wilcox.test(citedByCount~is_fund_pred, data = research, exact = FALSE)
-```
-
-JIF and citations based on registration:
-```{r}
-kable(research %>% 
-  group_by(is_register_pred) %>% 
-  summarise(Median = round(median(jif2020, na.rm = T), 1),
-            IQR = round(IQR(jif2020, na.rm = T), 2)))
-
-kable(research %>% 
-  group_by(is_register_pred) %>% 
-  summarise(Median = round(median(citedByCount, na.rm = T), 1),
-            IQR = round(IQR(citedByCount, na.rm = T), 2)))
-```
-
-Data was not normally distributed, hence we will use unpaired two-samples Wilcoxon test.
-```{r}
-wilcox.test(jif2020~is_register_pred, data = research, exact = FALSE)
-wilcox.test(citedByCount~is_register_pred, data = research, exact = FALSE)
-```
-
-JIF and citations based on data sharing:
-```{r}
-kable(research %>% 
-  group_by(is_open_data) %>% 
-  summarise(Median = round(median(jif2020, na.rm = T), 1),
-            IQR = round(IQR(jif2020, na.rm = T), 2)))
-
-kable(research %>% 
-  group_by(is_open_data) %>% 
-  summarise(Median = round(median(citedByCount, na.rm = T), 1),
-            IQR = round(IQR(citedByCount, na.rm = T), 2)))
-```
-
-Data was not normally distributed, hence we will use unpaired two-samples Wilcoxon test.
-```{r}
-wilcox.test(jif2020~is_open_data, data = research, exact = FALSE)
-wilcox.test(citedByCount~is_open_data, data = research, exact = FALSE)
-```
-
-JIF and citations based on code sharing:
-```{r}
-kable(research %>% 
-  group_by(is_open_code) %>% 
-  summarise(Median = round(median(jif2020, na.rm = T), 1),
-            IQR = round(IQR(jif2020, na.rm = T), 2)))
-
-kable(research %>% 
-  group_by(is_open_code) %>% 
-  summarise(Median = round(median(citedByCount, na.rm = T), 1),
-            IQR = round(IQR(citedByCount, na.rm = T), 2)))
-```
-
-Data was not normally distributed, hence we will use unpaired two-samples Wilcoxon test.
-```{r}
-wilcox.test(jif2020~is_open_code, data = research, exact = FALSE)
-wilcox.test(citedByCount~is_open_code, data = research, exact = FALSE)
-```
-
 ## Monthly trend
 Figure 1:
 ```{r}
@@ -1811,7 +1702,6 @@ For the line grapht, first, we add the real publication year and month to the da
 other$YearMonth <- format(as.Date(other$firstPublicationDate), "%Y-%m")
 ```
 
-
 ```{r}
 
 indicator_by_year <- 
@@ -1868,6 +1758,147 @@ figure2S <- ggarrange(p1, p2,
 figure2S
 #dev.off()
 
+```
+
+
+
+## Journal Impact Factor, SCImago rank, H-index and citation count analyses (Figure 4)
+
+Total number of papers published in journals with no JIF:
+```{r}
+sum(is.na(research$jif2020))
+```
+
+```{r}
+research$pubyearmonth = factor(interaction(research$year_firstpub,research$month_firstpub))
+research$jif2020_5 = factor(quant_groups(research$jif2020,5))
+levels(research$jif2020_5 ) = c("Q1","Q2","Q3","Q4","Q5")
+research = apply_labels(research,
+                        jif2020_5 = "Journal Impact Factor",
+                       is_coi_pred = "COI disclosure",
+                       is_fund_pred = "Funding disclosure",
+                        is_register_pred = "Protocol registeration",
+                       is_open_data = "Data sharing",
+                      is_open_code = "Code sharing" )
+
+
+library(expss)
+
+coi = glm(is_coi_pred ~ jif2020_5 + pubyearmonth + is_rct ,family="binomial",data=research)
+fund = glm(is_fund_pred ~ jif2020_5 + pubyearmonth+ is_rct,family="binomial",data=research)
+reg = glm(is_register_pred ~ jif2020_5 + pubyearmonth+ is_rct, family="binomial",data=research)
+data = glm(is_open_data ~ jif2020_5 + pubyearmonth+ is_rct ,family="binomial",data=research)
+code =glm(is_open_code ~ jif2020_5 + pubyearmonth+ is_rct ,family="binomial",data=research)
+
+library(sjPlot)
+library(ggeffects)
+jif_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
+            2020.3,2021.3,2022.3,
+            2020.4,2021.4,2022.4,
+            2020.5,2021.5,2022.5,
+            2020.6,2021.6,2022.6,
+            2020.7,2021.7,2022.7,
+            2020.8,2021.8,2022.8,
+            2020.9,2021.9,2022.9,
+            2020.10,2021.10,2022.10,
+            2020.11,2021.11,2022.11,
+            2020.12,2021.12,2022.12
+            ]","is_rct [TRUE]"), axis.lim=c(0.2,5)) + ggtitle("A. Journal Impact Factor quintiles") + theme_classic()
+```
+
+
+```{r}
+
+research$citedByCount_4 = factor(ifelse(research$citedByCount == 0,"0",
+                              ifelse(research$citedByCount >0 & research$citedByCount <11,"1-10",
+                                ifelse(research$citedByCount >10 & research$citedByCount <101,"11-100",
+                                       ifelse(research$citedByCount >100 ,"> 100",NA)))),levels=
+                                c("0","1-10","11-100","> 100"))
+
+coi = glm(is_coi_pred ~ citedByCount_4 + pubyearmonth +is_rct,family="binomial",data=research)
+fund = glm(is_fund_pred ~ citedByCount_4 + pubyearmonth+is_rct,family="binomial",data=research)
+reg = glm(is_register_pred ~ citedByCount_4 + pubyearmonth+is_rct,family="binomial",data=research)
+data = glm(is_open_data ~ citedByCount_4 + pubyearmonth+is_rct,family="binomial",data=research)
+code =glm(is_open_code ~ citedByCount_4 + pubyearmonth+is_rct,family="binomial",data=research)
+
+library(sjPlot)
+library(ggeffects)
+citation_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
+            2020.3,2021.3,2022.3,
+            2020.4,2021.4,2022.4,
+            2020.5,2021.5,2022.5,
+            2020.6,2021.6,2022.6,
+            2020.7,2021.7,2022.7,
+            2020.8,2021.8,2022.8,
+            2020.9,2021.9,2022.9,
+            2020.10,2021.10,2022.10,
+            2020.11,2021.11,2022.11,
+            2020.12,2021.12,2022.12
+            ]","is_rct [TRUE]"), axis.lim=c(0.2,5)) + ggtitle("B. Number of citations to article") + theme_classic()
+```
+
+
+```{r}
+
+research$scimago_hindex_5 = factor(quant_groups(research$scimago_hindex,5))
+levels(research$scimago_hindex_5 ) = c("Q1","Q2","Q3","Q4","Q5")
+
+coi = glm(is_coi_pred ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
+fund = glm(is_fund_pred ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
+reg = glm(is_register_pred ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
+data = glm(is_open_data ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
+code =glm(is_open_code ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
+
+library(sjPlot)
+library(ggeffects)
+hindex_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
+            2020.3,2021.3,2022.3,
+            2020.4,2021.4,2022.4,
+            2020.5,2021.5,2022.5,
+            2020.6,2021.6,2022.6,
+            2020.7,2021.7,2022.7,
+            2020.8,2021.8,2022.8,
+            2020.9,2021.9,2022.9,
+            2020.10,2021.10,2022.10,
+            2020.11,2021.11,2022.11,
+            2020.12,2021.12,2022.12
+            ]","is_rct [TRUE]"), axis.lim=c(0.2,5)) + ggtitle("C. Journal H-index quintiles") + theme_classic()+guides(fill=guide_legend(nrow=2,byrow=TRUE))
+```
+
+```{r}
+research$sjr2020_5 = factor(quant_groups(research$sjr2020,5))
+levels(research$sjr2020_5) = c("Q1","Q2","Q3","Q4","Q5")
+
+coi = glm(is_coi_pred ~ sjr2020_5+ pubyearmonth + is_rct,family="binomial",data=research)
+fund = glm(is_fund_pred ~sjr2020_5+ pubyearmonth+ is_rct,family="binomial",data=research)
+reg = glm(is_register_pred ~ sjr2020_5 + pubyearmonth+ is_rct,family="binomial",data=research)
+data = glm(is_open_data ~ sjr2020_5+ pubyearmonth+ is_rct,family="binomial",data=research)
+code =glm(is_open_code ~ sjr2020_5 + pubyearmonth+ is_rct,family="binomial",data=research)
+
+library(sjPlot)
+library(ggeffects)
+sjr_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
+            2020.3,2021.3,2022.3,
+            2020.4,2021.4,2022.4,
+            2020.5,2021.5,2022.5,
+            2020.6,2021.6,2022.6,
+            2020.7,2021.7,2022.7,
+            2020.8,2021.8,2022.8,
+            2020.9,2021.9,2022.9,
+            2020.10,2021.10,2022.10,
+            2020.11,2021.11,2022.11,
+            2020.12,2021.12,2022.12
+            ]","is_rct [TRUE]"), axis.lim=c(0.2,5)) + ggtitle("D. SCImago Journal Rank quintiles") + theme_classic()+guides(fill=guide_legend(nrow=2,byrow=TRUE))
+
+library(ggpubr)
+figure4 = ggarrange(jif_plot + theme(legend.title=element_blank()),
+                    citation_plot + theme(legend.title=element_blank()),
+                    sjr_plot + theme(legend.title=element_blank()),
+                    hindex_plot+ theme(legend.title=element_blank()),ncol=2,nrow=2,common.legend = T,legend = "bottom",align = "hv" ) 
+
+ggsave("figures/figure4.pdf",figure4,dpi=600,width = 20,height=20,units = "cm")
+ggsave("figures/figure4.eps",figure4,dpi=600,width = 20,height=20,units = "cm")
+ggsave("figures/figure4.tiff",figure4,dpi=600,width = 20,height=20,units = "cm",compression="lzw")
 ```
 
 
@@ -2063,5 +2094,47 @@ other %>%
         fisher.test(simulate.p.value=TRUE)
 ```
 
+
+# Validation sample
+
+Validation sample of transparency practice identification in 100 random articles. Data preparation.
+```{r,warning=FALSE}
+validation_data = readxl::read_excel(here("data","covid_transparency_randomsample.xlsx"))
+validation_data = validation_data  %>% mutate(true_coi =
+case_when( is_coi_pred ==FALSE & disc_coi ==TRUE ~ TRUE,
+is_coi_pred ==TRUE & disc_coi ==TRUE ~ FALSE,
+is_coi_pred ==TRUE & disc_coi ==FALSE ~ TRUE,
+is_coi_pred ==FALSE & disc_coi ==FALSE ~ FALSE))
+validation_data = validation_data  %>% mutate(true_fund = 
+case_when( is_fund_pred ==FALSE & disc_fund ==TRUE ~ TRUE,
+is_fund_pred ==TRUE & disc_fund ==TRUE ~ FALSE,
+is_fund_pred ==TRUE & disc_fund ==FALSE ~ TRUE,
+is_fund_pred ==FALSE & disc_fund ==FALSE ~ FALSE))
+validation_data = validation_data   %>% mutate(true_reg = 
+case_when( is_register_pred ==FALSE & disc_reg ==TRUE ~ TRUE,
+is_register_pred ==TRUE & disc_reg ==TRUE ~ FALSE,
+is_register_pred ==TRUE & disc_reg ==FALSE ~ TRUE,
+is_register_pred ==FALSE & disc_reg ==FALSE ~ FALSE))
+validation_data = validation_data  %>% mutate(true_data = 
+case_when( is_open_data ==FALSE & disc_data ==TRUE ~ TRUE,
+is_open_data ==TRUE & disc_data ==TRUE ~ FALSE,
+is_open_data ==TRUE & disc_data ==FALSE ~ TRUE,
+is_open_data ==FALSE & disc_data ==FALSE ~ FALSE))
+validation_data = validation_data   %>% mutate(true_code = 
+case_when( is_open_code ==FALSE & disc_code ==TRUE ~ TRUE,
+is_open_code ==TRUE & disc_code ==TRUE ~ FALSE,
+is_open_code ==TRUE & disc_code ==FALSE ~ TRUE,
+is_open_code ==FALSE & disc_code ==FALSE ~ FALSE))
+```
+
+Calculation of specificity and sensitivity.
+```{r}
+validation_data %>% select(is_coi_pred,true_coi) %>% table() %>% epi.tests()
+validation_data %>% select(is_fund_pred,true_fund) %>% table() %>% epi.tests()
+validation_data %>% select(is_register_pred,true_reg) %>% table() %>% epi.tests()
+validation_data %>% select(is_open_data,true_data) %>% table() %>% epi.tests()
+validation_data %>% select(is_open_code,true_code) %>% table() %>% epi.tests()
+
+```
 
 
