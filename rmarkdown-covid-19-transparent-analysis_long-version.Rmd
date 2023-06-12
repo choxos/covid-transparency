@@ -21,7 +21,10 @@ pacman::p_load(dplyr,
                forcats,
                nortest,
                caret,
-               tibble)
+               tibble,
+               sjPlot,
+               expss,
+               ggeffects)
 ```
 
 
@@ -1782,7 +1785,6 @@ research = apply_labels(research,
                       is_open_code = "Code sharing" )
 
 
-library(expss)
 
 coi = glm(is_coi_pred ~ jif2020_5 + pubyearmonth + is_rct ,family="binomial",data=research)
 fund = glm(is_fund_pred ~ jif2020_5 + pubyearmonth+ is_rct,family="binomial",data=research)
@@ -1790,8 +1792,6 @@ reg = glm(is_register_pred ~ jif2020_5 + pubyearmonth+ is_rct, family="binomial"
 data = glm(is_open_data ~ jif2020_5 + pubyearmonth+ is_rct ,family="binomial",data=research)
 code =glm(is_open_code ~ jif2020_5 + pubyearmonth+ is_rct ,family="binomial",data=research)
 
-library(sjPlot)
-library(ggeffects)
 jif_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
             2020.3,2021.3,2022.3,
             2020.4,2021.4,2022.4,
@@ -1821,8 +1821,7 @@ reg = glm(is_register_pred ~ citedByCount_4 + pubyearmonth+is_rct,family="binomi
 data = glm(is_open_data ~ citedByCount_4 + pubyearmonth+is_rct,family="binomial",data=research)
 code =glm(is_open_code ~ citedByCount_4 + pubyearmonth+is_rct,family="binomial",data=research)
 
-library(sjPlot)
-library(ggeffects)
+
 citation_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
             2020.3,2021.3,2022.3,
             2020.4,2021.4,2022.4,
@@ -1849,8 +1848,7 @@ reg = glm(is_register_pred ~ scimago_hindex_5 + pubyearmonth + is_rct,family="bi
 data = glm(is_open_data ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
 code =glm(is_open_code ~ scimago_hindex_5 + pubyearmonth + is_rct,family="binomial",data=research)
 
-library(sjPlot)
-library(ggeffects)
+
 hindex_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
             2020.3,2021.3,2022.3,
             2020.4,2021.4,2022.4,
@@ -1875,8 +1873,6 @@ reg = glm(is_register_pred ~ sjr2020_5 + pubyearmonth+ is_rct,family="binomial",
 data = glm(is_open_data ~ sjr2020_5+ pubyearmonth+ is_rct,family="binomial",data=research)
 code =glm(is_open_code ~ sjr2020_5 + pubyearmonth+ is_rct,family="binomial",data=research)
 
-library(sjPlot)
-library(ggeffects)
 sjr_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,2022.1,2020.2,2021.2,2022.2,
             2020.3,2021.3,2022.3,
             2020.4,2021.4,2022.4,
@@ -1890,7 +1886,6 @@ sjr_plot = plot_models(coi,fund,reg,data,code,rm.terms =c("pubyearmonth [2021.1,
             2020.12,2021.12,2022.12
             ]","is_rct [TRUE]"), axis.lim=c(0.2,5)) + ggtitle("D. SCImago Journal Rank quintiles") + theme_classic()+guides(fill=guide_legend(nrow=2,byrow=TRUE))
 
-library(ggpubr)
 figure4 = ggarrange(jif_plot + theme(legend.title=element_blank()),
                     citation_plot + theme(legend.title=element_blank()),
                     sjr_plot + theme(legend.title=element_blank()),
